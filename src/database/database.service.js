@@ -12,7 +12,13 @@ export const find = async ({ model, filter = {}, select = "", options = {} }) =>
     return await doc
 }
 
-export const createOne = async ({ model, data = {}, select = "", options = {} }) => {
+export const findById = async ({ model, id, select = "" }) => {
+    const doc = model.findById(id)
+    if (select) doc.select(select)
+    return await doc
+}
+
+export const createOne = async ({ model, data = {} }) => {
     const doc = model.create(data)
     return await doc
 }
@@ -24,7 +30,7 @@ export const updateOne = async ({ model, filter = {}, data = {}, select = "", op
     return await doc
 }
 
-export const deleteOne = async ({ model, filter = {}, select = "", options = {} }) => {
+export const deleteOne = async ({ model, filter = {} }) => {
     const doc = model.deleteOne(filter)
     return await doc
 }
