@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { GenderEnum, ProviderEnum } from "../../common/index.js";
+import { GenderEnum, ProviderEnum, RoleEnum } from "../../common/index.js";
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -23,27 +23,32 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    phone : {
+    phone: {
         type: String,
     },
-    DOB : {
+    DOB: {
         type: Date,
     },
-    gender : {
+    gender: {
         type: String,
-        enum : Object.values(GenderEnum), //convert the values object to an array
-        default : GenderEnum.Male
+        enum: Object.values(GenderEnum), //convert the values object to an array
+        default: GenderEnum.Male
     },
     provider: {
         type: String,
         enum: Object.values(ProviderEnum),
         default: ProviderEnum.System
+    },
+    role: {
+        type: String,
+        enum: Object.values(RoleEnum),
+        default: RoleEnum.User
     }
 });
 
 
 userSchema.virtual('userName').set(function (value) {
-    const [ firstName, lastName ] = value.split(' ');
+    const [firstName, lastName] = value.split(' ');
     this.firstName = firstName;
     this.lastName = lastName;
 }).get(function () {
