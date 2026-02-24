@@ -1,9 +1,9 @@
-import { ProviderEnum } from "../../common/index.js";
+import { decodeRefreshToken, decodeToken, generateToken, ProviderEnum } from "../../common/index.js";
 import {
   ConflictException,
   NotFoundException,
   UnauthorizedException,
-} from "../../common/utils/response/error.responce.js";
+} from "../../common/index.js";
 import { createOne, findOne, findById } from "../../database/database.service.js";
 import { UserModel } from "../../database/index.js";
 // import * as argon2 from "argon2";
@@ -11,6 +11,7 @@ import { hashPassword, comparePassword } from "../../common/index.js";
 import jwt from "jsonwebtoken";
 import { env } from "../../../config/index.js";
 import fs from "fs";
+import { OAuth2Client } from 'google-auth-library';
 
 // const private_key = fs.readFileSync("./private.key", "utf-8");
 
@@ -46,35 +47,15 @@ export const login = async (data, host) => {
   });
 
   const isMatch = await comparePassword(password, userExist.password);
-  // const isMatch = await argon2.verify(userExist.password, password);
-
 
   if (!userExist || !isMatch) {
     return NotFoundException({ message: "user is not exist" });
   }
 
-  let signature = undefined;
-  let audience = undefined;
-  switch (userExist.role) {
-    case "0":
-      signature = env.AdminSignature;
-      audience = "Admin";
-      break;
-    default:
-      signature = env.UserSignature;
-      audience = "User";
+  if (isMatch) {
+    const { accessToken, refreshToken } = await generateToken(userExist);
+    return { userExist, accessToken, refreshToken };
   }
-
-  const token = await jwt.sign({ id: userExist._id }, signature, {
-    expiresIn: env.JWT_EXPIRES_IN,
-    notBefore: "30s",
-    issuer: host,   // who issue the token 
-    audience
-  });
-
-  // const token = await jwt.sign({ id: userExist._id }, private_key, { algorithm: "RS256", expiresIn: env.JWT_EXPIRES_IN, notBefore: "30s", issuer: host, audience });
-
-  return { userExist, token };
 };
 
 export const getUserById = async (user) => {
@@ -87,3 +68,63 @@ export const getUserById = async (user) => {
 
   return userExist;
 }
+
+export const generateRefreshToken = async (token) => {
+  const decodedToken = await decodeRefreshToken(token);
+
+  let signature = undefined;
+  let audience = undefined;
+
+  switch (decodedToken.aud) {
+    case "Admin":
+      signature = env.AdminSignature;
+      audience = "Admin";
+      break;
+    default:
+      signature = env.UserSignature;
+      audience = "User";
+  }
+
+  const accessToken = await jwt.sign({ id: decodedToken.id }, signature, {
+    expiresIn: env.JWT_EXPIRES_IN,
+    audience
+  });
+
+  return accessToken;
+
+}
+
+export const signupGoogle = async (data) => {
+
+  const client = new OAuth2Client();
+  const ticket = await client.verifyIdToken({
+    idToken: data.idToken,
+    audience: env.WEB_CLIENT_ID,
+  });
+
+  const payload = ticket.getPayload();
+
+  if (!payload.email_verified) {
+    return UnauthorizedException({ message: "user is not verified" });
+  }
+
+  const userExist = await findOne({
+    model: UserModel,
+    filter: { email: payload.email, provider: ProviderEnum.Google },
+    select: "-__v"
+  });
+
+  if (userExist) {
+    return ConflictException({ message: "user is already exist" });
+  }
+
+  const user = await createOne({
+    model: UserModel,
+    data: { userName: payload.name, email: payload.email, provider: ProviderEnum.Google }
+  });
+
+  return user;
+
+};
+
+
