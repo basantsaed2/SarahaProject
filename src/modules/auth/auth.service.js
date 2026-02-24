@@ -6,14 +6,10 @@ import {
 } from "../../common/index.js";
 import { createOne, findOne, findById } from "../../database/database.service.js";
 import { UserModel } from "../../database/index.js";
-// import * as argon2 from "argon2";
 import { hashPassword, comparePassword } from "../../common/index.js";
 import jwt from "jsonwebtoken";
 import { env } from "../../../config/index.js";
-import fs from "fs";
 import { OAuth2Client } from 'google-auth-library';
-
-// const private_key = fs.readFileSync("./private.key", "utf-8");
 
 export const signup = async (data) => {
   const { userName, email, password, phone, role } = data;
@@ -28,7 +24,6 @@ export const signup = async (data) => {
   }
 
   const hashedPassword = await hashPassword(password);
-  // const hashPassword = await argon2.hash(password);
   const user = await createOne({
     model: UserModel,
     data: { userName, email, password: hashedPassword, phone, role }

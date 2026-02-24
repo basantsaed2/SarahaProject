@@ -1,15 +1,17 @@
 import { Router } from "express";
 import { signup, login, getUserById, generateRefreshToken, signupGoogle } from "./auth.service.js";
-import { SuccessResponse, auth } from "../../common/index.js";
+import { BadRequestException, SuccessResponse, auth } from "../../common/index.js";
+import { signupSchema, loginSchema } from "./auth.validation.js";
+import { validate } from "../../common/index.js";
 
 const router = Router();
 
-router.post('/signup', async (req, res) => {
+router.post('/signup', validate(signupSchema), async (req, res) => {
     const userAdedd = await signup(req.body);
     return SuccessResponse({ res, message: "user add sucessfully", data: userAdedd })
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', validate(loginSchema), async (req, res) => {
     const userAdedd = await login(req.body, `${req.protocol}://${req.host}`);
     return SuccessResponse({ res, message: "user login sucessfully", data: userAdedd })
 });
