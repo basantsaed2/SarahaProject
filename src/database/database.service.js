@@ -31,6 +31,6 @@ export const updateOne = async ({ model, filter = {}, data = {}, select = "", op
 }
 
 export const deleteOne = async ({ model, filter = {} }) => {
-    const doc = model.deleteOne(filter)
+    const doc = model.findOneAndDelete(filter)
     return await doc
 }

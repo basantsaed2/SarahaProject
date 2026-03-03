@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/main.js",
   "scripts": {
-    "start:dev": "node --watch src/main.js"
+    "start:dev": "nodemon src/main.js"
   },
   "keywords": [],
   "author": "",
@@ -20,5 +20,8 @@
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
