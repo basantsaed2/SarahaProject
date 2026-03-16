@@ -6,13 +6,14 @@ import {
   deleteMessage,
 } from "./messages.service.js";
 import { SuccessResponse } from "../../common/utils/response/success.responce.js";
-import { auth } from "../../common/index.js";
+import { auth, validate } from "../../common/index.js";
 import { multer_local } from "../../common/middleware/multer.js";
 import { extensionMap } from "../../common/extension/extensions.js";
+import { sendMessageSchema } from "./messages.validation.js";
 
 const router = Router();
 
-router.post("/send-message/:receverId", async (req, res) => {
+router.post("/send-message/:receverId",validate(sendMessageSchema), async (req, res) => {
   let data = await sendMessage(req.body, req.params.receverId);
   SuccessResponse({ res, message: "Message sent successfully", data });
 });

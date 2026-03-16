@@ -3,10 +3,18 @@ import { decodeToken } from "../security/security.js";
 
 export const auth = async (req, res, next) => {
 
-    const token = req.headers.authorization;
+    const authHeader = req.headers.authorization;
 
-    if (!token) {
+    if (!authHeader) {
         return UnauthorizedException({ message: "token is not exist" });
+    }
+
+    // Handle Bearer token format
+    let token;
+    if (authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7); 
+    } else {
+        token = authHeader; 
     }
 
     const decodedToken = await decodeToken(token);

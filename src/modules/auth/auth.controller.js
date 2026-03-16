@@ -3,11 +3,13 @@ import { signup, login, getUserById, generateRefreshToken, signupGoogle } from "
 import { BadRequestException, SuccessResponse, auth } from "../../common/index.js";
 import { signupSchema, loginSchema } from "./auth.validation.js";
 import { validate } from "../../common/index.js";
+import { multer_local } from "../../common/middleware/multer.js";
+import { extensionMap } from "../../common/extension/extensions.js";
 
 const router = Router();
 
-router.post('/signup', validate(signupSchema), async (req, res) => {
-    const userAdedd = await signup(req.body);
+router.post('/signup', multer_local({ customPath: "users/profileImages" , allowedExtensions: extensionMap.image }).single("image"), validate(signupSchema), async (req, res) => {
+    const userAdedd = await signup(req.body , req.file );
     return SuccessResponse({ res, message: "user add sucessfully", data: userAdedd })
 });
 

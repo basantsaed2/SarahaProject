@@ -11,8 +11,8 @@ import jwt from "jsonwebtoken";
 import { env } from "../../../config/index.js";
 import { OAuth2Client } from 'google-auth-library';
 
-export const signup = async (data) => {
-  const { userName, email, password, phone, role } = data;
+export const signup = async (data , file ) => {
+  const { userName, email, password, phone, role , shareProfileName } = data;
 
   const userExist = await findOne({
     model: UserModel,
@@ -23,10 +23,18 @@ export const signup = async (data) => {
     return ConflictException({ message: "user is already exist" });
   }
 
+  let image = '';
+
+  if (file) {
+    image = `${env.base_url}/${file.destination}/${file.filename}`;
+  }
+
+  console.log(image);
+
   const hashedPassword = await hashPassword(password);
   const user = await createOne({
     model: UserModel,
-    data: { userName, email, password: hashedPassword, phone, role }
+    data: { userName, email, password: hashedPassword, phone, role, shareProfileName, image }
   });
 
   return user;
