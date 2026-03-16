@@ -22,3 +22,12 @@ export const loginSchema = joi.object({
     email: joi.string().email().required(),
     password: joi.string().min(6).max(30).alphanum().required(),
 });
+
+export const fileSchema = joi.object({
+    file: joi.object({
+        fieldname: joi.string().required(),
+        originalname: joi.string().required(),
+        mimetype: joi.string().required(),
+        size: joi.number().required(),
+    }).required()
+});
