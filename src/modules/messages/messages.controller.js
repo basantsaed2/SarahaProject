@@ -7,11 +7,20 @@ import {
 } from "./messages.service.js";
 import { SuccessResponse } from "../../common/utils/response/success.responce.js";
 import { auth, validate } from "../../common/index.js";
+import { env } from "../../../config/index.js";
 import { multer_local } from "../../common/middleware/multer.js";
 import { extensionMap } from "../../common/extension/extensions.js";
 import { sendMessageSchema } from "./messages.validation.js";
 
 const router = Router();
+
+const toPublicUrl = (file) => {
+  const pathFromUpload = `${file.destination}/${file.filename}`.replace(/\\/g, "/");
+  const relativePath = pathFromUpload.includes("uploads")
+    ? pathFromUpload.substring(pathFromUpload.indexOf("uploads"))
+    : pathFromUpload;
+  return `${env.base_url}/${relativePath}`;
+};
 
 router.post("/send-message/:receverId",validate(sendMessageSchema), async (req, res) => {
   let data = await sendMessage(req.body, req.params.receverId);
@@ -37,7 +46,7 @@ router.post(
   "/message_image",
   multer_local({ customPath: "messages/singleImages" , allowedExtensions: extensionMap.image }).single("image"),
   (req, res) => {
-    req.file.finalPath = `${req.file.destination}/${req.file.filename}`;
+    req.file.finalPath = toPublicUrl(req.file);
     res.status(200).json({
       message: "done",
       file: req.file,
@@ -51,7 +60,7 @@ router.post(
   multer_local({ customPath: "messages/multipleImages" }).array("images", 2),
   (req, res) => {
     req.files.forEach((file) => {
-      file.finalPath = `${file.destination}/${file.filename}`;
+      file.finalPath = toPublicUrl(file);
     });
     res.status(200).json({
       message: "done",
@@ -86,7 +95,7 @@ router.post(
     Object.values(req.files)
       .flat()
       .forEach((file) => {
-        file.finalPath = `${file?.destination}/${file.filename}`;
+        file.finalPath = toPublicUrl(file);
       });
 
     res.status(200).json({

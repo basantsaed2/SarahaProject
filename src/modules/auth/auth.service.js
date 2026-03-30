@@ -26,10 +26,16 @@ export const signup = async (data , file ) => {
   let image = '';
 
   if (file) {
-    image = `${env.base_url}/${file.destination}/${file.filename}`;
+    const pathFromUpload = `${file.destination}/${file.filename}`.replace(/\\/g, "/");
+    const relativePath = pathFromUpload.includes("uploads")
+      ? pathFromUpload.substring(pathFromUpload.indexOf("uploads"))
+      : pathFromUpload;
+    image = `${env.base_url}/${relativePath}`;
   }
 
-  console.log(image);
+  console.log("Received file:", file); // Log the file object to check its properties
+  console.log("Constructed image URL:", image); // Log the constructed image URL
+  console.log("data", data); // Check if the file size is greater than 0
 
   const hashedPassword = await hashPassword(password);
   const user = await createOne({

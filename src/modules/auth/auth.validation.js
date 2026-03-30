@@ -27,7 +27,6 @@ export const signupSchema = joi.object({
   age: joi.number().integer().min(18).max(100).required(),
   role: joi.string().optional().default("User"),
   users: joi.array().items(joi.string()).min(2).max(10).optional(),
-  // Removed image field since it's handled by file upload, not request body
 });
 
 export const loginSchema = joi.object({
