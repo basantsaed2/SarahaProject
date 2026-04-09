@@ -19,12 +19,12 @@ export const bootstrap = async () => {
     await databaseConnection();
     await connectRedis();
 
-    await set({
-        key: "user",
-        value: "bassant",
-        ex: 60
-    })
-    console.log(await get("user"));
+    // await set({
+    //     key: "user",
+    //     value: "bassant",
+    //     ex: 60
+    // })
+    // console.log(await get("user"));
 
     app.use("/auth", authRouter)
     app.use("/message", messageRouter)
