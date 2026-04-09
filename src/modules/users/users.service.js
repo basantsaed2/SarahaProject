@@ -1,8 +1,7 @@
-import { findById, findOne } from "../../database/index.js";
+import { findById, findOne, updateOne, deleteOne } from "../../database/index.js";
 import { UserModel } from "../../database/models/users.model.js";
 import { env } from "../../../config/env.service.js";
 import { BadRequestException } from "../../common/index.js";
-import e from "express";
 
 export const getUserProfile = async (userId) => {
   let user = await findById({
@@ -39,4 +38,43 @@ export const getUserByShareProfileName = async (data) => {
     throw BadRequestException({ message: "User not found" });
   }
   return user;
+};
+
+export const UpdateUserProfile = async (userId , data ,file) => {
+
+  let updateData = { ...data };
+
+  if (file) {
+    const pathFromUpload = `${file.destination}/${file.filename}`.replace(/\\/g, "/");
+    const relativePath = pathFromUpload.includes("uploads")
+      ? pathFromUpload.substring(pathFromUpload.indexOf("uploads"))
+      : pathFromUpload;
+    updateData.image = `${env.base_url}/${relativePath}`;
+  }
+
+  const existingUser = await updateOne({
+    model: UserModel,
+    filter: { _id: userId },
+    update: updateData
+  });
+
+  if (!existingUser) {
+    throw BadRequestException({ message: "User not found" });
+  }
+
+  return existingUser;
+
+}
+
+export const deleteUser = async (userId) => {
+  const deletedUser = await deleteOne({
+    model: UserModel,
+    filter: { _id: userId }
+  });
+
+  if (!deletedUser) {
+    throw BadRequestException({ message: "User not found" });
+  }
+
+  return deletedUser;
 };

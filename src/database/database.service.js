@@ -23,8 +23,8 @@ export const createOne = async ({ model, data = {} }) => {
     return await doc
 }
 
-export const updateOne = async ({ model, filter = {}, data = {}, select = "", options = {} }) => {
-    const doc = model.findOneAndUpdate(filter, data, options)
+export const updateOne = async ({ model, filter = {}, update = {}, select = "", options = {} }) => {
+    const doc = model.findOneAndUpdate(filter, update, options)
     if (select) doc.select(select)
     if (options.populate) doc.populate(options.populate)
     return await doc
