@@ -6,14 +6,25 @@ import authRouter from "./modules/auth/auth.controller.js"
 import messageRouter from "./modules/messages/messages.controller.js"
 import cors from "cors"
 import userRouter from "./modules/users/users.controller.js";
-export const bootstrap = () => {
+import { connectRedis, client } from "./database/redis.js";
+import { set, get } from "./database/redis.service.js";
+export const bootstrap = async () => {
 
     const app = express();
     app.use(express.json());
 
     app.use("/uploads", express.static("uploads"))
     app.use(cors());
-    databaseConnection();
+
+    await databaseConnection();
+    await connectRedis();
+
+    await set({
+        key: "user",
+        value: "bassant",
+        ex: 60
+    })
+    console.log(await get("user"));
 
     app.use("/auth", authRouter)
     app.use("/message", messageRouter)

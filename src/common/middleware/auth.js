@@ -1,5 +1,6 @@
 import { UnauthorizedException } from "../utils/response/error.responce.js";
 import { decodeToken } from "../security/security.js";
+import { get } from "../../database/redis.service.js";
 
 export const auth = async (req, res, next) => {
 
@@ -12,14 +13,19 @@ export const auth = async (req, res, next) => {
     // Handle Bearer token format
     let token;
     if (authHeader.startsWith('Bearer ')) {
-        token = authHeader.substring(7); 
+        token = authHeader.substring(7);
     } else {
-        token = authHeader; 
+        token = authHeader;
     }
 
     const decodedToken = await decodeToken(token);
 
-    req.user = decodedToken;
+    const isRevoked = await get(`revokeToken::${decodedToken.id}::${token}`);
+    if (isRevoked !== null) {
+        return UnauthorizedException({ message: "token is revoked" });
+    }
 
+    req.user = decodedToken;
+    req.token = token;
     next();
 }

@@ -16,6 +16,7 @@ const UserSignature = process.env.JWT_USER_SIGNATURE;
 const AdminRefreshSignature = process.env.JWT_ADMIN_REFRESH_SIGNATURE;
 const UserRefreshSignature = process.env.JWT_USER_REFRESH_SIGNATURE;
 const WEB_CLIENT_ID = process.env.WEB_CLIENT_ID;
+const REDIS_URL = process.env.REDIS_URL;
 
 
 export const env = {
@@ -31,5 +32,6 @@ export const env = {
     UserSignature,
     AdminRefreshSignature,
     UserRefreshSignature,
-    WEB_CLIENT_ID
+    WEB_CLIENT_ID,
+    REDIS_URL
 }

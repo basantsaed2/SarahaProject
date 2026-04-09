@@ -5,6 +5,7 @@ import {
   getUserById,
   generateRefreshToken,
   signupGoogle,
+  logout,
 } from "./auth.service.js";
 import {
   BadRequestException,
@@ -68,4 +69,8 @@ router.post("/signup/email", async (req, res) => {
   return SuccessResponse({ res, message: "user add sucessfully", data });
 });
 
+router.get("/logout", auth, async (req, res) => {
+  await logout(req);
+  return SuccessResponse({ res, message: "user logout sucessfully" });
+});
 export default router;

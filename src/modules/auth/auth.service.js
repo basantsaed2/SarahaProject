@@ -10,9 +10,10 @@ import { hashPassword, comparePassword } from "../../common/index.js";
 import jwt from "jsonwebtoken";
 import { env } from "../../../config/index.js";
 import { OAuth2Client } from 'google-auth-library';
+import { set } from "../../database/redis.service.js";
 
-export const signup = async (data , file ) => {
-  const { userName, email, password, phone, role , shareProfileName } = data;
+export const signup = async (data, file) => {
+  const { userName, email, password, phone, role, shareProfileName } = data;
 
   const userExist = await findOne({
     model: UserModel,
@@ -32,10 +33,6 @@ export const signup = async (data , file ) => {
       : pathFromUpload;
     image = `${env.base_url}/${relativePath}`;
   }
-
-  console.log("Received file:", file); // Log the file object to check its properties
-  console.log("Constructed image URL:", image); // Log the constructed image URL
-  console.log("data", data); // Check if the file size is greater than 0
 
   const hashedPassword = await hashPassword(password);
   const user = await createOne({
@@ -135,5 +132,10 @@ export const signupGoogle = async (data) => {
   return user;
 
 };
+
+export const logout = async (req) => {
+  let redisKey = `revokeToken::${req.user.id}::${req.token}`;
+  await set({ key: redisKey, value: 1, ex: req.user.iat + 30 * 60 });
+}
 
 
