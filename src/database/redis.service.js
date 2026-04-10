@@ -1,5 +1,9 @@
 import { client } from "./redis.js";
 
+export const createRevokeKey = ({ id, token }) => {
+    return `revokeToken::${id}::${token}`;
+}
+
 export const set = async ({ key, value, ex } = {}) => {
     if (typeof value == "object") {
         value = JSON.stringify(value);

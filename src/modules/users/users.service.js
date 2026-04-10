@@ -2,17 +2,29 @@ import { findById, findOne, updateOne, deleteOne } from "../../database/index.js
 import { UserModel } from "../../database/models/users.model.js";
 import { env } from "../../../config/env.service.js";
 import { BadRequestException } from "../../common/index.js";
+import { get, set, update } from "../../database/redis.service.js";
+
+export const getRedisKey = (userId) => {
+  return `userProfile::${userId}`;
+}
 
 export const getUserProfile = async (userId) => {
-  let user = await findById({
+  let redisKey = getRedisKey(userId);
+  let user = await get(redisKey);
+  if (user) {
+    return user;
+  }
+  user = await findById({
     model: UserModel,
     id: userId,
     select: "firstName lastName email shareProfileName",
   });
   if (!user) {
     throw BadRequestException({ message: "User not found" });
+  } else {
+    await set({ key: getRedisKey(userId), value: user, ex: 60 * 60 * 24 });
+    return user;
   }
-  return user;
 };
 
 export const shareProfileLink = async (userId) => {
@@ -40,7 +52,7 @@ export const getUserByShareProfileName = async (data) => {
   return user;
 };
 
-export const UpdateUserProfile = async (userId , data ,file) => {
+export const UpdateUserProfile = async (userId, data, file) => {
 
   let updateData = { ...data };
 
@@ -60,9 +72,11 @@ export const UpdateUserProfile = async (userId , data ,file) => {
 
   if (!existingUser) {
     throw BadRequestException({ message: "User not found" });
+  } else {
+    // await del({ key: getRedisKey(userId) });
+    await update({ key: getRedisKey(userId), value: existingUser, ex: 60 * 60 * 24 });
+    return existingUser;
   }
-
-  return existingUser;
 
 }
 

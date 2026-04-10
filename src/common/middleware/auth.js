@@ -1,6 +1,6 @@
 import { UnauthorizedException } from "../utils/response/error.responce.js";
 import { decodeToken } from "../security/security.js";
-import { get } from "../../database/redis.service.js";
+import { createRevokeKey, get } from "../../database/redis.service.js";
 
 export const auth = async (req, res, next) => {
 
@@ -20,7 +20,7 @@ export const auth = async (req, res, next) => {
 
     const decodedToken = await decodeToken(token);
 
-    const isRevoked = await get(`revokeToken::${decodedToken.id}::${token}`);
+    const isRevoked = await get(createRevokeKey({ id: decodedToken.id, token }));
     if (isRevoked !== null) {
         return UnauthorizedException({ message: "token is revoked" });
     }
