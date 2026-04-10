@@ -4,13 +4,14 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "../../common/index.js";
-import { createOne, findOne, findById } from "../../database/database.service.js";
+import { createOne, findOne, findById, updateOne } from "../../database/database.service.js";
 import { UserModel } from "../../database/index.js";
 import { hashPassword, comparePassword } from "../../common/index.js";
 import jwt from "jsonwebtoken";
 import { env } from "../../../config/index.js";
 import { OAuth2Client } from 'google-auth-library';
-import { createRevokeKey, set } from "../../database/redis.service.js";
+import { createRevokeKey, set, get } from "../../database/redis.service.js";
+import { event } from "../../common/utils/email/email.events.js";
 
 export const signup = async (data, file) => {
   const { userName, email, password, phone, role, shareProfileName } = data;
@@ -40,6 +41,45 @@ export const signup = async (data, file) => {
     data: { userName, email, password: hashedPassword, phone, role, shareProfileName, image }
   });
 
+  event.emit("verfiyEmail", { userId: user._id, email });
+
+  return user;
+};
+
+export const verifyEmail = async (data) => {
+  const { email, code } = data;
+
+  let user = await findOne({
+    model: UserModel,
+    filter: { email }
+  });
+
+  if (user.isVerified) {
+    return NotFoundException({ message: "user is already verified" });
+  }
+
+  if (!user) {
+    return NotFoundException({ message: "user is not exist" });
+  }
+
+  let radisCode = await get(`otp::${user._id}`);
+
+  if (!radisCode) {
+    return NotFoundException({ message: "code is not exist" });
+  }
+
+  const isMatch = await comparePassword(code, radisCode);
+
+  if (!isMatch) {
+    return NotFoundException({ message: "code is not exist" });
+  } else {
+    user = await updateOne({
+      model: UserModel,
+      filter: { _id: user._id },
+      update: { $set: { isVerified: true } },
+      options: { new: true }
+    });
+  }
   return user;
 };
 

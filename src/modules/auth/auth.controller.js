@@ -6,9 +6,9 @@ import {
   generateRefreshToken,
   signupGoogle,
   logout,
+  verifyEmail
 } from "./auth.service.js";
 import {
-  BadRequestException,
   SuccessResponse,
   auth,
 } from "../../common/index.js";
@@ -36,6 +36,15 @@ router.post(
     });
   },
 );
+
+router.post("/verify-email", async (req, res) => {
+  const userAdedd = await verifyEmail(req.body);
+  return SuccessResponse({
+    res,
+    message: "user verified sucessfully",
+    data: userAdedd,
+  });
+});
 
 router.post("/login", validate(loginSchema), async (req, res) => {
   const userAdedd = await login(req.body, `${req.protocol}://${req.host}`);

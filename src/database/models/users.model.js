@@ -51,6 +51,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: Object.values(RoleEnum),
         default: RoleEnum.User
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
     }
 });
 

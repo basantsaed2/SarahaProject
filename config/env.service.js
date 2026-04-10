@@ -17,7 +17,9 @@ const AdminRefreshSignature = process.env.JWT_ADMIN_REFRESH_SIGNATURE;
 const UserRefreshSignature = process.env.JWT_USER_REFRESH_SIGNATURE;
 const WEB_CLIENT_ID = process.env.WEB_CLIENT_ID;
 const REDIS_URL = process.env.REDIS_URL;
-
+const APP_PASS = process.env.APP_PASS;
+const APP_EMAIL = process.env.APP_EMAIL;
+const APP_NAME = process.env.APP_NAME;
 
 export const env = {
     mongo_url,
@@ -33,5 +35,8 @@ export const env = {
     AdminRefreshSignature,
     UserRefreshSignature,
     WEB_CLIENT_ID,
-    REDIS_URL
+    REDIS_URL,
+    APP_PASS,
+    APP_EMAIL,
+    APP_NAME
 }
